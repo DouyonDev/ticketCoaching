@@ -20,7 +20,7 @@ public class AdminController {
         return utilisateurService.creerFormateur(formateur);
     }
 
-    @DeleteMapping("/formateurs/{id}")
+    @DeleteMapping("/formateurs/id")
     public void supprimerFormateur(@PathVariable int id) {
         utilisateurService.supprimerFormateur(id);
     }

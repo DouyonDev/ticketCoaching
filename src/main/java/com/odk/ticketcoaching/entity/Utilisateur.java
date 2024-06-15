@@ -1,10 +1,11 @@
 package com.odk.ticketcoaching.entity;
 
+import com.odk.ticketcoaching.entity.Enum.Roles;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+//import jakarta.validation.constraints.Email;
+//import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,25 +17,24 @@ public class Utilisateur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Le nom est obligatoire")
+    //@NotBlank(message = "Le nom est obligatoire")
     private String nom;
 
-    @NotBlank(message = "Le prénom est obligatoire")
+    //@NotBlank(message = "Le prénom est obligatoire")
     private String prenom;
 
-    @NotBlank(message = "Le nom d'utilisateur est obligatoire")
+    //@NotBlank(message = "Le nom d'utilisateur est obligatoire")
     private String username;
 
-    @Email(message = "Veuillez entrer une adresse email valide")
-    @NotBlank(message = "L'email est obligatoire")
+    //@Email(message = "Veuillez entrer une adresse email valide")
+    //@NotBlank(message = "L'email est obligatoire")
     private String email;
 
     // Utilisez BCrypt pour encoder le mot de passe avant de le stocker
     private String motDePasse;
 
     @Enumerated(EnumType.STRING)
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<Role> roles = new HashSet<>();
+    private Roles role;
 
     @OneToMany
     private Set<Ticket> tickets;
@@ -43,9 +43,9 @@ public class Utilisateur {
 
 
 
-    public void hashMotDePasse(String motDePasse) {
-        this.motDePasse = new BCryptPasswordEncoder().encode(motDePasse);
-    }
+   // public void hashMotDePasse(String motDePasse) {
+     //   this.motDePasse = new BCryptPasswordEncoder().encode(motDePasse);
+    //}
 
 
 

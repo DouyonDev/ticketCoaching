@@ -2,6 +2,8 @@ package com.odk.ticketcoaching.service;
 
 
 import com.odk.ticketcoaching.entity.*;
+import com.odk.ticketcoaching.entity.Enum.Roles;
+import com.odk.ticketcoaching.entity.Enum.Statuts;
 import com.odk.ticketcoaching.repository.BaseConnaissanceRepository;
 import com.odk.ticketcoaching.repository.TicketRepository;
 import com.odk.ticketcoaching.repository.UtilisateurRepository;
@@ -20,46 +22,49 @@ public class UtilisateurService {
     @Autowired
     private TicketRepository ticketRepository;
 
+    @Autowired
+    private BaseConnaissanceRepository baseConnaissanceRepository;
+
     // Méthodes pour gérer les formateurs (accessible par les admins)
     public Utilisateur creerFormateur(Utilisateur formateur) {
-        if (!formateur.getRoles().equals(Role.FORMATEUR)) {
-            throw new IllegalArgumentException("Le rôle de l'utilisateur doit être FORMATEUR");
-        }
+        //if (!formateur.getRole().equals(Roles.FORMATEUR)) {
+          //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être FORMATEUR");
+        //}
         return utilisateurRepository.save(formateur);
     }
 
     public void supprimerFormateur(int id) {
         Utilisateur formateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Formateur non trouvé"));
-        if (!formateur.getRoles().equals(Role.FORMATEUR)) {
-            throw new IllegalArgumentException("L'utilisateur n'est pas un formateur");
-        }
+        //if (!formateur.getRole().equals(Roles.FORMATEUR)) {
+          //  throw new IllegalArgumentException("L'utilisateur n'est pas un formateur");
+        //}
         utilisateurRepository.deleteById(id);
     }
 
     public List<Utilisateur> listerFormateurs() {
-        return utilisateurRepository.findByRole(Role.FORMATEUR);
+        return utilisateurRepository.findByRole(Roles.FORMATEUR);
     }
 
     // Méthodes pour gérer les apprenants (accessible par les formateurs)
     public Utilisateur creerApprenant(Utilisateur apprenant) {
-        if (!apprenant.getRoles().equals(Role.APPRENANT)) {
-            throw new IllegalArgumentException("Le rôle de l'utilisateur doit être APPRENANT");
-        }
+        //if (!apprenant.getRole().equals(Roles.APPRENANT)) {
+          //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être APPRENANT");
+        //}
         return utilisateurRepository.save(apprenant);
     }
 
     public void supprimerApprenant(int id) {
         Utilisateur apprenant = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Apprenant non trouvé"));
-        if (!apprenant.getRoles().equals(Role.APPRENANT)) {
-            throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
-        }
+        //if (!apprenant.getRole().equals(Roles.APPRENANT)) {
+          //  throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
+        //}
         utilisateurRepository.deleteById(id);
     }
 
     public List<Utilisateur> listerApprenants() {
-        return utilisateurRepository.findByRole(Role.APPRENANT);
+        return utilisateurRepository.findByRole(Roles.APPRENANT);
     }
 
     // Méthodes pour gérer les tickets (accessible par les formateurs et apprenants)
@@ -71,7 +76,7 @@ public class UtilisateurService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket non trouvé"));
         ticket.setReponse(reponse);
-        ticket.setStatut(Statut.REPONDU);
+        ticket.setStatut(Statuts.REPONDU);
         return ticketRepository.save(ticket);
     }
 
@@ -84,11 +89,11 @@ public class UtilisateurService {
             BaseConnaissance baseConnaissance = new BaseConnaissance();
             baseConnaissance.setQuestion(ticket.getDescription());
             baseConnaissance.setReponse(ticket.getReponse());
-            baseConnaissance.save(baseConnaissance);
-
-
+            baseConnaissanceRepository.save(baseConnaissance);
+        }
         return ticketRepository.save(ticket);
     }
+
     public List<Ticket> listerTickets() {
         return ticketRepository.findAll();
     }

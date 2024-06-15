@@ -1,7 +1,9 @@
 package com.odk.ticketcoaching.entity;
 
+import com.odk.ticketcoaching.entity.Enum.Priorites;
+import com.odk.ticketcoaching.entity.Enum.Statuts;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+//import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.time.LocalDateTime; // Importez LocalDateTime pour la date de création
 
@@ -12,7 +14,7 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "La description est requise") // Validation avec Lombok
+    //@NotBlank(message = "La description est requise") // Validation avec Lombok
     private String description;
 
     private String categorie;
@@ -20,10 +22,10 @@ public class Ticket {
     private String Reponse;
 
     @Enumerated(EnumType.STRING)
-    private Priorite priorite;
+    private Priorites priorite;
 
     @Enumerated(EnumType.STRING)
-    private Statut statut;
+    private Statuts statut;
 
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime dateCreation; // Utilisez LocalDateTime
