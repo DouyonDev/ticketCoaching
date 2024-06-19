@@ -1,6 +1,7 @@
 package com.odk.ticketcoaching.service;
 
 
+import ch.qos.logback.classic.encoder.JsonEncoder;
 import com.odk.ticketcoaching.entity.*;
 import com.odk.ticketcoaching.entity.Enum.Roles;
 import com.odk.ticketcoaching.entity.Enum.Statuts;
@@ -9,6 +10,7 @@ import com.odk.ticketcoaching.repository.TicketRepository;
 import com.odk.ticketcoaching.repository.UtilisateurRepository;
 import org.antlr.v4.runtime.misc.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,11 +27,26 @@ public class UtilisateurService {
     @Autowired
     private BaseConnaissanceRepository baseConnaissanceRepository;
 
+    //@Autowired
+    //private PasswordEncoder passwordEncoder;
+
+    public Utilisateur creerAdmin(Utilisateur Admin) {
+        if (!Admin.getRole().equals(Roles.ADMIN)) {
+          throw new IllegalArgumentException("Ce lien est pour l'insertion des admins");
+        }
+        //Admin.setMotDePasse(passwordEncoder.encode(Admin.getMotDePasse()));
+
+        return utilisateurRepository.save(Admin);
+    }
+
     // Méthodes pour gérer les formateurs (accessible par les admins)
     public Utilisateur creerFormateur(Utilisateur formateur) {
         //if (!formateur.getRole().equals(Roles.FORMATEUR)) {
           //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être FORMATEUR");
         //}
+
+        //formateur.setMotDePasse(passwordEncoder.encode(formateur.getMotDePasse()));
+
         return utilisateurRepository.save(formateur);
     }
 
@@ -51,6 +68,8 @@ public class UtilisateurService {
         //if (!apprenant.getRole().equals(Roles.APPRENANT)) {
           //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être APPRENANT");
         //}
+
+        //apprenant.setMotDePasse(passwordEncoder.encode(apprenant.getMotDePasse()));
         return utilisateurRepository.save(apprenant);
     }
 

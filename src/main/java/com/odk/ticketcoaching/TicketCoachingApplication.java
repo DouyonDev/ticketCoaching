@@ -36,14 +36,14 @@ public class TicketCoachingApplication implements CommandLineRunner {
 		System.out.println("Votre mot de passe");
 		String motDePasse = entre.nextLine();
 
-		Utilisateur formateur = new Utilisateur();
-		formateur.setNom(nom);
-		formateur.setPrenom(prenom);
-		formateur.setUsername(username);
-		formateur.setEmail(email);
-		formateur.setMotDePasse(motDePasse);
-		formateur.setRole(Roles.FORMATEUR);
+		Utilisateur admin = new Utilisateur();
+		admin.setNom(nom);
+		admin.setPrenom(prenom);
+		admin.setUsername(username);
+		admin.setEmail(email);
+		admin.setMotDePasse(motDePasse);
+		admin.setRole(Roles.FORMATEUR);
 
-		utilisateurService.creerFormateur(formateur);
+		utilisateurService.creerFormateur(admin);
 	}
 }

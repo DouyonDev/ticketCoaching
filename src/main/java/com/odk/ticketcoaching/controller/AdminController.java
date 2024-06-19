@@ -4,6 +4,7 @@ package com.odk.ticketcoaching.controller;
 import com.odk.ticketcoaching.entity.Utilisateur;
 import com.odk.ticketcoaching.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +15,12 @@ public class AdminController {
 
     @Autowired
     private UtilisateurService utilisateurService;
+
+    @PostMapping("/ajoutadmin")
+    public ResponseEntity<Utilisateur> ajouterAdmin(@RequestBody Utilisateur admin) {
+        Utilisateur savedAdmin = utilisateurService.creerAdmin(admin);
+        return ResponseEntity.ok(savedAdmin);
+    }
 
     @PostMapping("/formateurs")
     public Utilisateur creerFormateur(@RequestBody Utilisateur formateur) {
