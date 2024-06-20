@@ -1,5 +1,6 @@
 package com.odk.ticketcoaching.entity;
 
+import com.odk.ticketcoaching.entity.Enum.Categories;
 import com.odk.ticketcoaching.entity.Enum.Priorites;
 import com.odk.ticketcoaching.entity.Enum.Statuts;
 import jakarta.persistence.*;
@@ -17,7 +18,8 @@ public class Ticket {
     //@NotBlank(message = "La description est requise") // Validation avec Lombok
     private String description;
 
-    private String categorie;
+    @Enumerated(EnumType.STRING)
+    private Categories categorie;
 
     private String Reponse;
 
@@ -30,10 +32,10 @@ public class Ticket {
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime dateCreation; // Utilisez LocalDateTime
 
-    private boolean resolu;
+    private boolean resolu=false;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
+    @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
     // Assurez-vous que la classe Utilisateur a une annotation @OneToMany pour cette relation

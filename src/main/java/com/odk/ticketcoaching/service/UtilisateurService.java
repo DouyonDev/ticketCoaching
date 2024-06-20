@@ -11,6 +11,7 @@ import com.odk.ticketcoaching.repository.UtilisateurRepository;
 import org.antlr.v4.runtime.misc.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,11 +40,19 @@ public class UtilisateurService {
         return utilisateurRepository.save(Admin);
     }
 
+    public void supprimerAdmin(int id) {
+        Utilisateur Admin = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Admin non trouvé"));
+        if (!Admin.getRole().equals(Roles.ADMIN)) {
+          throw new IllegalArgumentException("L'utilisateur n'est pas un Administrateur");
+        }else utilisateurRepository.deleteById(id);
+    }
+
     // Méthodes pour gérer les formateurs (accessible par les admins)
     public Utilisateur creerFormateur(Utilisateur formateur) {
-        //if (!formateur.getRole().equals(Roles.FORMATEUR)) {
-          //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être FORMATEUR");
-        //}
+        if (!formateur.getRole().equals(Roles.FORMATEUR)) {
+            throw new IllegalArgumentException("Le rôle de l'utilisateur doit être FORMATEUR");
+        }
 
         //formateur.setMotDePasse(passwordEncoder.encode(formateur.getMotDePasse()));
 
@@ -53,10 +62,9 @@ public class UtilisateurService {
     public void supprimerFormateur(int id) {
         Utilisateur formateur = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Formateur non trouvé"));
-        //if (!formateur.getRole().equals(Roles.FORMATEUR)) {
-          //  throw new IllegalArgumentException("L'utilisateur n'est pas un formateur");
-        //}
-        utilisateurRepository.deleteById(id);
+        if (!formateur.getRole().equals(Roles.FORMATEUR)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un formateur");
+        }else utilisateurRepository.deleteById(id);
     }
 
     public List<Utilisateur> listerFormateurs() {
@@ -65,9 +73,9 @@ public class UtilisateurService {
 
     // Méthodes pour gérer les apprenants (accessible par les formateurs)
     public Utilisateur creerApprenant(Utilisateur apprenant) {
-        //if (!apprenant.getRole().equals(Roles.APPRENANT)) {
-          //  throw new IllegalArgumentException("Le rôle de l'utilisateur doit être APPRENANT");
-        //}
+        if (!apprenant.getRole().equals(Roles.APPRENANT)) {
+            throw new IllegalArgumentException("Le rôle de l'utilisateur doit être APPRENANT");
+        }
 
         //apprenant.setMotDePasse(passwordEncoder.encode(apprenant.getMotDePasse()));
         return utilisateurRepository.save(apprenant);
@@ -76,10 +84,9 @@ public class UtilisateurService {
     public void supprimerApprenant(int id) {
         Utilisateur apprenant = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Apprenant non trouvé"));
-        //if (!apprenant.getRole().equals(Roles.APPRENANT)) {
-          //  throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
-        //}
-        utilisateurRepository.deleteById(id);
+        if (!apprenant.getRole().equals(Roles.APPRENANT)) {
+            throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
+        }else utilisateurRepository.deleteById(id);
     }
 
     public List<Utilisateur> listerApprenants() {
@@ -87,8 +94,19 @@ public class UtilisateurService {
     }
 
     // Méthodes pour gérer les tickets (accessible par les formateurs et apprenants)
-    public Ticket creerTicket(Ticket ticket) {
+
+    public Ticket creerTicket(Ticket ticket, int utilisateurId) {
+        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+
+        ticket.setUtilisateur(utilisateur);
         return ticketRepository.save(ticket);
+    }
+
+    public void supprimerTicket(int id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket non trouvé"));
+        ticketRepository.deleteById(id);
     }
 
     public Ticket repondreTicket(int ticketId, String reponse) {

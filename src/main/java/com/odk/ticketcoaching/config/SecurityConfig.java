@@ -1,4 +1,4 @@
-/*package com.odk.ticketcoaching.config;
+package com.odk.ticketcoaching.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withUsername("ADOUYON")
                 .password(passwordEncoder().encode("adouyon"))
-                .roles("USER")
+                .roles("ADMIN")
                 .build();
 
         return new InMemoryUserDetailsManager(user);
@@ -40,6 +40,7 @@ public class SecurityConfig {
         return auth;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -51,4 +52,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-}*/
+}

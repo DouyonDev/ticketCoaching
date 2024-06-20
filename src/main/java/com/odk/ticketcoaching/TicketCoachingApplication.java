@@ -42,7 +42,7 @@ public class TicketCoachingApplication implements CommandLineRunner {
 		admin.setUsername(username);
 		admin.setEmail(email);
 		admin.setMotDePasse(motDePasse);
-		admin.setRole(Roles.FORMATEUR);
+		admin.setRole(Roles.APPRENANT);
 
 		utilisateurService.creerFormateur(admin);
 	}

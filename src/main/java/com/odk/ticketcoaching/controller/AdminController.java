@@ -22,14 +22,22 @@ public class AdminController {
         return ResponseEntity.ok(savedAdmin);
     }
 
-    @PostMapping("/formateurs")
-    public Utilisateur creerFormateur(@RequestBody Utilisateur formateur) {
-        return utilisateurService.creerFormateur(formateur);
+    @DeleteMapping("/SuppAdmin/{id}")
+    public ResponseEntity<Void> supprimerAdmin(@PathVariable int id) {
+        utilisateurService.supprimerAdmin(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/formateurs/id")
-    public void supprimerFormateur(@PathVariable int id) {
+    @PostMapping("/formateurs")
+    public ResponseEntity<Utilisateur> creerFormateur(@RequestBody Utilisateur formateur) {
+        Utilisateur saveFormateur = utilisateurService.creerFormateur(formateur);
+        return ResponseEntity.ok(saveFormateur);
+    }
+
+    @DeleteMapping("/formateurs/{id}")
+    public ResponseEntity<Void> supprimerFormateur(@PathVariable int id) {
         utilisateurService.supprimerFormateur(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/formateurs")

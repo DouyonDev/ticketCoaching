@@ -5,6 +5,7 @@ import com.odk.ticketcoaching.entity.Ticket;
 import com.odk.ticketcoaching.entity.Utilisateur;
 import com.odk.ticketcoaching.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,13 +18,15 @@ public class FormateurController {
     private UtilisateurService utilisateurService;
 
     @PostMapping("/apprenants")
-    public Utilisateur creerApprenant(@RequestBody Utilisateur apprenant) {
-        return utilisateurService.creerApprenant(apprenant);
+    public ResponseEntity<Utilisateur> ajouterApprenant(@RequestBody Utilisateur apprenant) {
+        Utilisateur savedApprenant = utilisateurService.creerApprenant(apprenant);
+        return ResponseEntity.ok(savedApprenant);
     }
 
     @DeleteMapping("/apprenants/{id}")
-    public void supprimerApprenant(@PathVariable int id) {
+    public ResponseEntity<Void> supprimerApprenant(@PathVariable int id) {
         utilisateurService.supprimerApprenant(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/apprenants")
