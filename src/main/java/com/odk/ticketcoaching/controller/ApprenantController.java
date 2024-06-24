@@ -2,10 +2,14 @@ package com.odk.ticketcoaching.controller;
 
 
 import com.odk.ticketcoaching.entity.Ticket;
+import com.odk.ticketcoaching.entity.Utilisateur;
+import com.odk.ticketcoaching.repository.UtilisateurRepository;
 import com.odk.ticketcoaching.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +20,20 @@ public class ApprenantController {
 
     @Autowired
     private UtilisateurService utilisateurService;
+    @Autowired
+    UtilisateurRepository utilisateurRepository;
 
     @PostMapping("/tickets")
-    public ResponseEntity<Ticket> creerTicket(@RequestBody Ticket ticket, @RequestParam int utilisateurId) {
-        Ticket nouveauTicket = utilisateurService.creerTicket(ticket, utilisateurId);
-        return ResponseEntity.ok(nouveauTicket); //<>(nouveauTicket, HttpStatus.CREATED);
+    public ResponseEntity<Ticket> creerTicket(@RequestBody Ticket ticket) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Utilisateur utilisateur = utilisateurRepository.findByUsername(username);
+
+        if (utilisateur == null) {
+            return ResponseEntity.status(404).body(null);
+        }
+        Ticket nouveauTicket = utilisateurService.creerTicket(ticket,utilisateur.getId().intValue());
+        return ResponseEntity.ok(nouveauTicket);
     }
 
     @GetMapping("/tickets")

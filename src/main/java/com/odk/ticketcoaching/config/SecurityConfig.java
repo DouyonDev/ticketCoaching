@@ -1,14 +1,18 @@
 package com.odk.ticketcoaching.config;
 
+import com.odk.ticketcoaching.entity.Enum.Roles;
 import com.odk.ticketcoaching.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,7 +38,7 @@ public class SecurityConfig {
 
 
 
-    @Bean
+    /*@Bean
     public UserDetailsService userDetailsService() {
         UserDetails admin = User.withUsername("ADOUYON")
                 .password(passwordEncoder().encode("adouyon"))
@@ -44,25 +48,27 @@ public class SecurityConfig {
                 .password(passwordEncoder().encode("formateur"))
                 .roles("FORMATEUR")
                 .build();
+
         UserDetails apprenant = User.withUsername("apprenant")
                 .password(passwordEncoder().encode("apprenant"))
                 .roles("APPRENANT")
                 .build();
 
         return new InMemoryUserDetailsManager(admin,formateur,apprenant);
-    }
+    }*/
 
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/login","/auth/register").permitAll()
-                        .requestMatchers("api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("api/formateur/**").hasRole("FORMATEUR")
-                        .requestMatchers("api/apprenant/**").hasRole("APPRENANT")
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("api/admin/**").hasRole(Roles.ADMIN.name())
+                        .requestMatchers("api/formateur/**").hasRole(Roles.FORMATEUR.name())
+                        .requestMatchers("api/apprenant/**").hasRole(Roles.APPRENANT.name())
                         .anyRequest().authenticated()
                 )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
 
@@ -70,11 +76,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(customUserDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-    /*@Bean
+
+    @Bean
     public UserDetailsService userDetailsService() {
         return customUserDetailsService;
-    }*/
+    }
 }

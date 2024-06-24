@@ -45,6 +45,7 @@ public class AdminController {
 
     @GetMapping("/formateurs")
     public List<Utilisateur> listerFormateurs() {
+
         return utilisateurService.listerFormateurs();
     }
 }

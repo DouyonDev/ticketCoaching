@@ -119,8 +119,6 @@ public class UtilisateurService {
         ticket.setReponse(reponse);
         ticket.setStatut(Statuts.REPONDU);
         // Envoyer une notification à l'apprenant
-
-        // Envoyer une notification à l'apprenant
         String emailApprenant = ticket.getUtilisateur().getEmail();
         String subject = "Votre ticket a été répondu";
         String message = "Bonjour " + ticket.getUtilisateur().getPrenom() + ",\n\nVotre ticket avec la description : \"" + ticket.getDescription() + "\" a été répondu.\n\nRéponse : " + reponse;
