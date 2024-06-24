@@ -1,12 +1,14 @@
 package com.odk.ticketcoaching.entity.Enum;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.odk.ticketcoaching.entity.Utilisateur;
+import jakarta.persistence.*;
 import lombok.Data;
 
-public enum Roles {
-    APPRENANT,
-    FORMATEUR,
-    ADMIN;
 
+public enum Roles {
+
+    ADMIN,
+    FORMATEUR,
+    APPRENANT
 }
+

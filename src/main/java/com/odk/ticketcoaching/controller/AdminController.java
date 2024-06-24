@@ -1,6 +1,7 @@
 package com.odk.ticketcoaching.controller;
 
 
+import com.odk.ticketcoaching.entity.Enum.Roles;
 import com.odk.ticketcoaching.entity.Utilisateur;
 import com.odk.ticketcoaching.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ public class AdminController {
 
     @Autowired
     private UtilisateurService utilisateurService;
+
+    private Roles role;
 
     @PostMapping("/ajoutadmin")
     public ResponseEntity<Utilisateur> ajouterAdmin(@RequestBody Utilisateur admin) {

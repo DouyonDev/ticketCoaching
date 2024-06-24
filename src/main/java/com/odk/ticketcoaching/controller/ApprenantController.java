@@ -20,7 +20,7 @@ public class ApprenantController {
     @PostMapping("/tickets")
     public ResponseEntity<Ticket> creerTicket(@RequestBody Ticket ticket, @RequestParam int utilisateurId) {
         Ticket nouveauTicket = utilisateurService.creerTicket(ticket, utilisateurId);
-        return new ResponseEntity<>(nouveauTicket, HttpStatus.CREATED);
+        return ResponseEntity.ok(nouveauTicket); //<>(nouveauTicket, HttpStatus.CREATED);
     }
 
     @GetMapping("/tickets")

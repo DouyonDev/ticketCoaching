@@ -36,16 +36,11 @@ public class Utilisateur {
     @Enumerated(EnumType.STRING)
     private Roles role;
 
-    @OneToMany
+    @OneToMany(mappedBy = "utilisateur")
     private Set<Ticket> tickets;
-    @OneToMany
+    @OneToMany(mappedBy = "utilisateur")
     private Set<Notification> notifications;
 
-
-
-    // public void hashMotDePasse(String motDePasse) {
-     //   this.motDePasse = new BCryptPasswordEncoder().encode(motDePasse);
-    //}
 
 
 
