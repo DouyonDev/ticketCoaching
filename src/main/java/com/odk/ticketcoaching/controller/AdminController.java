@@ -1,8 +1,11 @@
 package com.odk.ticketcoaching.controller;
 
 
+import com.odk.ticketcoaching.entity.BaseConnaissance;
 import com.odk.ticketcoaching.entity.Enum.Roles;
+import com.odk.ticketcoaching.entity.Ticket;
 import com.odk.ticketcoaching.entity.Utilisateur;
+import com.odk.ticketcoaching.repository.BaseConnaissanceRepository;
 import com.odk.ticketcoaching.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +29,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/SuppAdmin/{id}")
-    public ResponseEntity<Void> supprimerAdmin(@PathVariable int id) {
+    public ResponseEntity<String> supprimerAdmin(@PathVariable int id) {
         utilisateurService.supprimerAdmin(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Administrateur supprimer avec succes !!!");
     }
 
     @PostMapping("/formateurs")
@@ -47,5 +50,18 @@ public class AdminController {
     public List<Utilisateur> listerFormateurs() {
 
         return utilisateurService.listerFormateurs();
+    }
+    @PostMapping("/insererBC")
+    public ResponseEntity<BaseConnaissance> insertionBC(@RequestBody BaseConnaissance baseConnaissance) {
+        BaseConnaissance saveQuestions = utilisateurService.insererBC(baseConnaissance);
+        return ResponseEntity.ok(saveQuestions);
+    }
+    @GetMapping("/tickets")
+    public List<Ticket> listerTickets() {
+        return utilisateurService.listerTickets();
+    }
+    @GetMapping("/baseConnaissance")
+    public List<BaseConnaissance> listerBC() {
+        return utilisateurService.listerBaseConnaissance();
     }
 }

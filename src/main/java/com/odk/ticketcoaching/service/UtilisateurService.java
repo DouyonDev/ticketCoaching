@@ -2,6 +2,7 @@ package com.odk.ticketcoaching.service;
 
 
 import ch.qos.logback.classic.encoder.JsonEncoder;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.odk.ticketcoaching.entity.*;
 import com.odk.ticketcoaching.entity.Enum.Roles;
 import com.odk.ticketcoaching.entity.Enum.Statuts;
@@ -9,10 +10,12 @@ import com.odk.ticketcoaching.repository.BaseConnaissanceRepository;
 import com.odk.ticketcoaching.repository.NotificationRepository;
 import com.odk.ticketcoaching.repository.TicketRepository;
 import com.odk.ticketcoaching.repository.UtilisateurRepository;
+import jakarta.transaction.Transactional;
 import org.antlr.v4.runtime.misc.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -85,12 +88,22 @@ public class UtilisateurService {
         return utilisateurRepository.save(apprenant);
     }
 
+
     public void supprimerApprenant(int id) {
         Utilisateur apprenant = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Apprenant non trouvé"));
         if (!apprenant.getRole().equals(Roles.APPRENANT)) {
             throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
-        }else utilisateurRepository.deleteById(id);
+        }else {
+            // Mettre à jour les tickets pour dissocier l'utilisateur
+            List<Ticket> tickets = ticketRepository.findByUtilisateur(apprenant);
+            for (Ticket ticket : tickets) {
+
+                ticket.setUtilisateur(null);
+            }
+            ticketRepository.saveAll(tickets);
+            utilisateurRepository.deleteById(id);
+        }
     }
 
     public List<Utilisateur> listerApprenants() {
@@ -101,15 +114,33 @@ public class UtilisateurService {
 
     public Ticket creerTicket(Ticket ticket, int utilisateurId) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Apprenant non trouvé"));
 
+        ticket.setDateCreation(LocalDateTime.now());
+        ticket.setStatut(Statuts.EN_COURS);
         ticket.setUtilisateur(utilisateur);
-        return ticketRepository.save(ticket);
+        Ticket enrTicket = ticketRepository.save(ticket);
+        List<Utilisateur> utilisateurs = utilisateurRepository.findByRole(Roles.FORMATEUR);
+        for (Utilisateur utilisateur1 : utilisateurs) {
+            // Envoyer une notification aux formateurs
+            String emailformateur = utilisateur1.getEmail();
+            String subject = "Un nouveau ticket à été ajouter par l'apprenant : "+utilisateur.getUsername();
+            String message = "Bonjour "+utilisateur1.getUsername() + ",\n\nUn ticket a été ajouter par : \""
+                    + utilisateur.getUsername()
+                    + "\", nous avons besoin de votre expertise.\n\nDescription : " + ticket.getDescription()
+                    + "\n\nPriorité : " + ticket.getPriorite()
+                    + "\n\nCategorie : " + ticket.getCategorie();
+            emailService.sendSimpleMessage(emailformateur,subject,message);
+        }
+        return enrTicket;
     }
 
-    public void supprimerTicket(int id) {
+    public void supprimerTicket(int id,String currentUsername) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket non trouvé"));
+        if (!ticket.getUtilisateur().getUsername().equals(currentUsername)) {
+            throw new AccessDeniedException("Un ticket est supprimer que par l'apprenant qui la creer");
+        }
         ticketRepository.deleteById(id);
     }
 
@@ -131,12 +162,12 @@ public class UtilisateurService {
                 .orElseThrow(() -> new RuntimeException("Ticket non trouvé"));
         ticket.setResolu(resolu);
 
-        if (resolu) {
+        /*if (resolu) {
             BaseConnaissance baseConnaissance = new BaseConnaissance();
             baseConnaissance.setQuestion(ticket.getDescription());
             baseConnaissance.setReponse(ticket.getReponse());
             baseConnaissanceRepository.save(baseConnaissance);
-        }
+        }*/
         return ticketRepository.save(ticket);
     }
 
@@ -144,6 +175,29 @@ public class UtilisateurService {
         return ticketRepository.findAll();
     }
 
+    public Ticket ModifierTicket(int ticketId, Ticket nouveauTicket, String currentUsername) throws AccessDeniedException {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket non existant pour l'id :: " + ticketId));
+
+        if (!ticket.getUtilisateur().getUsername().equals(currentUsername)) {
+            throw new AccessDeniedException("Seul l'apprenant qui a creer ce ticket peut le modifier !!!");
+        }
+
+        if (nouveauTicket.getDescription()!=null && nouveauTicket.getCategorie()!=ticket.getCategorie() && nouveauTicket.getPriorite()!=ticket.getPriorite()) {
+            ticket.setDescription(nouveauTicket.getDescription());
+                ticket.setCategorie(nouveauTicket.getCategorie());
+                ticket.setPriorite(nouveauTicket.getPriorite());
+            }
+        return ticketRepository.save(ticket);
+    }
+
+    public BaseConnaissance insererBC(BaseConnaissance baseConnaissance){
+        return baseConnaissanceRepository.save(baseConnaissance);
+    }
+
+    public List<BaseConnaissance> listerBaseConnaissance() {
+        return baseConnaissanceRepository.findAll();
+    }
 
 
 

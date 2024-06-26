@@ -24,6 +24,4 @@ public class Notification {
 
     @ManyToOne
     private Ticket ticket;
-
-
 }

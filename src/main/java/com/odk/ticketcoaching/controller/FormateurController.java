@@ -1,6 +1,7 @@
 package com.odk.ticketcoaching.controller;
 
 
+import com.odk.ticketcoaching.entity.BaseConnaissance;
 import com.odk.ticketcoaching.entity.Ticket;
 import com.odk.ticketcoaching.entity.Utilisateur;
 import com.odk.ticketcoaching.service.UtilisateurService;
@@ -43,4 +44,10 @@ public class FormateurController {
     public List<Ticket> listerTickets() {
         return utilisateurService.listerTickets();
     }
+
+    @GetMapping("/baseConnaissance")
+    public List<BaseConnaissance> listerBC() {
+        return utilisateurService.listerBaseConnaissance();
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.odk.ticketcoaching.controller;
 
 
+import com.odk.ticketcoaching.entity.BaseConnaissance;
 import com.odk.ticketcoaching.entity.Ticket;
 import com.odk.ticketcoaching.entity.Utilisateur;
 import com.odk.ticketcoaching.repository.UtilisateurRepository;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -42,13 +44,27 @@ public class ApprenantController {
     }
 
     @DeleteMapping("/SuppTicket/{id}")
-    public ResponseEntity<Void> supprimerTicket(@PathVariable int id) {
-        utilisateurService.supprimerTicket(id);
+    public ResponseEntity<Void> supprimerTicket(@PathVariable int id,Principal principal) {
+        String currentUsername = principal.getName();
+        utilisateurService.supprimerTicket(id,currentUsername);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/tickets/{id}/resolu")
-    public Ticket ticketRepondu(@PathVariable int id) {
+    @PostMapping("/tickets/{id}/Resolu")
+    public Ticket ticketResolu(@PathVariable int id) {
         return utilisateurService.marquerTicketCommeResolu(id, true);
+    }
+
+
+    @PutMapping("/modifierTicket/{id}")
+    public ResponseEntity<Ticket> modifierTicket(@PathVariable(value = "id") int ticketId, @RequestBody Ticket ticketDetails, Principal principal) {
+        String currentUsername = principal.getName();
+        Ticket updatedTicket =utilisateurService.ModifierTicket(ticketId, ticketDetails, currentUsername);
+        return ResponseEntity.ok(updatedTicket);
+    }
+
+    @GetMapping("/baseConnaissance")
+    public List<BaseConnaissance> listerBC() {
+        return utilisateurService.listerBaseConnaissance();
     }
 }

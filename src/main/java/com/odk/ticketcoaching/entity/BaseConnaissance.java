@@ -15,8 +15,9 @@ public class BaseConnaissance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private String Titre;
     private String question;
     private String reponse;
-
+    private String liens_util;
 
 }

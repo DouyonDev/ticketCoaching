@@ -15,7 +15,6 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //@NotBlank(message = "La description est requise") // Validation avec Lombok
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -30,13 +29,14 @@ public class Ticket {
     private Statuts statut;
 
     @Column(columnDefinition = "TIMESTAMP")
-    private LocalDateTime dateCreation; // Utilisez LocalDateTime
+    private LocalDateTime dateCreation;
 
     private boolean resolu=false;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id", nullable = false)
+    @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
 
-    // Assurez-vous que la classe Utilisateur a une annotation @OneToMany pour cette relation
+    private Utilisateur formateur;
+
 }
