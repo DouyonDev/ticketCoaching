@@ -1,8 +1,7 @@
 package com.odk.ticketcoaching.service;
 
 
-import ch.qos.logback.classic.encoder.JsonEncoder;
-import com.fasterxml.jackson.databind.ser.Serializers;
+
 import com.odk.ticketcoaching.entity.*;
 import com.odk.ticketcoaching.entity.Enum.Roles;
 import com.odk.ticketcoaching.entity.Enum.Statuts;
@@ -10,18 +9,18 @@ import com.odk.ticketcoaching.repository.BaseConnaissanceRepository;
 import com.odk.ticketcoaching.repository.NotificationRepository;
 import com.odk.ticketcoaching.repository.TicketRepository;
 import com.odk.ticketcoaching.repository.UtilisateurRepository;
-import jakarta.transaction.Transactional;
-import org.antlr.v4.runtime.misc.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UtilisateurService {
@@ -44,13 +43,23 @@ public class UtilisateurService {
     @Autowired
     private EmailService emailService;
 
+    public Utilisateur utilisateurConnecter(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        return utilisateurRepository.findByUsername(currentUserName);
+    }
+
     public Utilisateur creerAdmin(Utilisateur Admin) {
 
+        Utilisateur currentadmin = utilisateurConnecter();
+
+        Admin.setUtilisateurMere(currentadmin);
         Admin.setRole(Roles.ADMIN);
         Admin.setMotDePasse(passwordEncoder.encode(Admin.getMotDePasse()));
 
         return utilisateurRepository.save(Admin);
     }
+
 
     public void supprimerAdmin(int id) {
         Utilisateur Admin = utilisateurRepository.findById(id)
@@ -62,8 +71,9 @@ public class UtilisateurService {
 
     // Méthodes pour gérer les formateurs (accessible par les admins)
     public Utilisateur creerFormateur(Utilisateur formateur) {
+        Utilisateur currentadmin = utilisateurConnecter();
+        formateur.setUtilisateurMere(currentadmin);
         formateur.setRole(Roles.FORMATEUR);
-
         formateur.setMotDePasse(passwordEncoder.encode(formateur.getMotDePasse()));
 
         return utilisateurRepository.save(formateur);
@@ -83,6 +93,8 @@ public class UtilisateurService {
 
     // Méthodes pour gérer les apprenants (accessible par les formateurs)
     public Utilisateur creerApprenant(Utilisateur apprenant) {
+        Utilisateur currentFormateur = utilisateurConnecter();
+        apprenant.setUtilisateurMere(currentFormateur);
         apprenant.setRole(Roles.APPRENANT);
         apprenant.setMotDePasse(passwordEncoder.encode(apprenant.getMotDePasse()));
         return utilisateurRepository.save(apprenant);
@@ -96,10 +108,10 @@ public class UtilisateurService {
             throw new IllegalArgumentException("L'utilisateur n'est pas un apprenant");
         }else {
             // Mettre à jour les tickets pour dissocier l'utilisateur
-            List<Ticket> tickets = ticketRepository.findByUtilisateur(apprenant);
+            List<Ticket> tickets = ticketRepository.findByApprenant(apprenant);
             for (Ticket ticket : tickets) {
 
-                ticket.setUtilisateur(null);
+                ticket.setApprenant(null);
             }
             ticketRepository.saveAll(tickets);
             utilisateurRepository.deleteById(id);
@@ -112,34 +124,45 @@ public class UtilisateurService {
 
     // Méthodes pour gérer les tickets (accessible par les formateurs et apprenants)
 
-    public Ticket creerTicket(Ticket ticket, int utilisateurId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+    public Ticket creerTicket(Ticket ticket, int apprenantId) {
+        Utilisateur apprenant = utilisateurRepository.findById(apprenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Apprenant non trouvé"));
 
         ticket.setDateCreation(LocalDateTime.now());
         ticket.setStatut(Statuts.EN_COURS);
-        ticket.setUtilisateur(utilisateur);
+        ticket.setApprenant(apprenant);
+        ticket.setFormateur(apprenant.getUtilisateurMere());
         Ticket enrTicket = ticketRepository.save(ticket);
-        List<Utilisateur> utilisateurs = utilisateurRepository.findByRole(Roles.FORMATEUR);
-        for (Utilisateur utilisateur1 : utilisateurs) {
+        //List<Utilisateur> formateurs = utilisateurRepository.findByRole(Roles.FORMATEUR);
+        // Envoyer une notification aux formateurs
+        String emailformateur = ticket.getFormateur().getEmail();
+        String subject = "Un nouveau ticket a été ajouter par l'apprenant : "+apprenant.getUsername();
+        String message = "Bonjour "+ticket.getFormateur().getUsername() + ",\n\nUn ticket a été ajouter par : \""
+                + apprenant.getUsername()
+                + "\", nous avons besoin de votre expertise.\n\nDescription : " + ticket.getDescription()
+                + "\n\nPriorité : " + ticket.getPriorite()
+                + "\n\nCategorie : " + ticket.getCategorie();
+        emailService.sendSimpleMessage(emailformateur,subject,message);
+
+        /*for (Utilisateur formateur1 : formateurs) {
             // Envoyer une notification aux formateurs
-            String emailformateur = utilisateur1.getEmail();
-            String subject = "Un nouveau ticket à été ajouter par l'apprenant : "+utilisateur.getUsername();
-            String message = "Bonjour "+utilisateur1.getUsername() + ",\n\nUn ticket a été ajouter par : \""
-                    + utilisateur.getUsername()
+            String emailformateur = formateur1.getEmail();
+            String subject = "Un nouveau ticket à été ajouter par l'apprenant : "+apprenant.getUsername();
+            String message = "Bonjour "+formateur1.getUsername() + ",\n\nUn ticket a été ajouter par : \""
+                    + apprenant.getUsername()
                     + "\", nous avons besoin de votre expertise.\n\nDescription : " + ticket.getDescription()
                     + "\n\nPriorité : " + ticket.getPriorite()
                     + "\n\nCategorie : " + ticket.getCategorie();
             emailService.sendSimpleMessage(emailformateur,subject,message);
-        }
+        }*/
         return enrTicket;
     }
 
-    public void supprimerTicket(int id,String currentUsername) {
+    public void supprimerTicket(int id,String currentApprenant) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket non trouvé"));
-        if (!ticket.getUtilisateur().getUsername().equals(currentUsername)) {
-            throw new AccessDeniedException("Un ticket est supprimer que par l'apprenant qui la creer");
+        if (!ticket.getApprenant().getUsername().equals(currentApprenant)) {
+            throw new AccessDeniedException("Un ticket est supprimer que par l'apprenant qui l'a crée");
         }
         ticketRepository.deleteById(id);
     }
@@ -150,9 +173,10 @@ public class UtilisateurService {
         ticket.setReponse(reponse);
         ticket.setStatut(Statuts.REPONDU);
         // Envoyer une notification à l'apprenant
-        String emailApprenant = ticket.getUtilisateur().getEmail();
+        String emailApprenant = ticket.getApprenant().getEmail();
         String subject = "Votre ticket a été répondu";
-        String message = "Bonjour " + ticket.getUtilisateur().getPrenom() + ",\n\nVotre ticket avec la description : \"" + ticket.getDescription() + "\" a été répondu.\n\nRéponse : " + reponse;
+        String message = "Bonjour " + ticket.getApprenant().getPrenom() + ",\n\nVotre ticket avec la description : \""
+                + ticket.getDescription() + "\" a été répondu.\n\nRéponse : " + reponse;
         emailService.sendSimpleMessage(emailApprenant, subject, message);
         return ticketRepository.save(ticket);
     }
@@ -175,19 +199,23 @@ public class UtilisateurService {
         return ticketRepository.findAll();
     }
 
-    public Ticket ModifierTicket(int ticketId, Ticket nouveauTicket, String currentUsername) throws AccessDeniedException {
+    public Ticket ModifierTicket(int ticketId, Ticket nouveauTicket, String currentApprenant) throws AccessDeniedException {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket non existant pour l'id :: " + ticketId));
 
-        if (!ticket.getUtilisateur().getUsername().equals(currentUsername)) {
+        if (!ticket.getApprenant().getUsername().equals(currentApprenant)) {
             throw new AccessDeniedException("Seul l'apprenant qui a creer ce ticket peut le modifier !!!");
         }
 
-        if (nouveauTicket.getDescription()!=null && nouveauTicket.getCategorie()!=ticket.getCategorie() && nouveauTicket.getPriorite()!=ticket.getPriorite()) {
+        if (!Objects.equals(nouveauTicket.getDescription(), ticket.getDescription())) {
             ticket.setDescription(nouveauTicket.getDescription());
+            if (nouveauTicket.getCategorie()!=ticket.getCategorie()){
                 ticket.setCategorie(nouveauTicket.getCategorie());
-                ticket.setPriorite(nouveauTicket.getPriorite());
+                if(nouveauTicket.getPriorite()!=ticket.getPriorite()){
+                    ticket.setPriorite(nouveauTicket.getPriorite());
+                }
             }
+        }
         return ticketRepository.save(ticket);
     }
 

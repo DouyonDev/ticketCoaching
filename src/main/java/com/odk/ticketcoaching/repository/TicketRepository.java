@@ -10,5 +10,5 @@ import java.util.List;
 
 
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
-    List<Ticket> findByUtilisateur(Utilisateur utilisateur);
+    List<Ticket> findByApprenant(Utilisateur utilisateur);
 }

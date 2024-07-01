@@ -20,7 +20,10 @@ public class Notification {
     private LocalDateTime dateEnvoi;
 
     @ManyToOne
-    private Utilisateur utilisateur;
+    private Utilisateur formateur;
+
+    @ManyToOne
+    private Utilisateur apprenant;
 
     @ManyToOne
     private Ticket ticket;

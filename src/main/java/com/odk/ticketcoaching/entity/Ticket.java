@@ -34,9 +34,13 @@ public class Ticket {
     private boolean resolu=false;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_id")
-    private Utilisateur utilisateur;
+    //@JoinColumn(name = "utilisateur_id")
+    //@Column(insertable=false, updatable=false)
+    private Utilisateur apprenant;
 
+    @ManyToOne
+    //@JoinColumn(name = "utilisateur_id")
+    //@Column(insertable=false, updatable=false)
     private Utilisateur formateur;
 
 }

@@ -45,8 +45,8 @@ public class ApprenantController {
 
     @DeleteMapping("/SuppTicket/{id}")
     public ResponseEntity<Void> supprimerTicket(@PathVariable int id,Principal principal) {
-        String currentUsername = principal.getName();
-        utilisateurService.supprimerTicket(id,currentUsername);
+        String currentApprenant = principal.getName();
+        utilisateurService.supprimerTicket(id,currentApprenant);
         return ResponseEntity.noContent().build();
     }
 
@@ -58,8 +58,8 @@ public class ApprenantController {
 
     @PutMapping("/modifierTicket/{id}")
     public ResponseEntity<Ticket> modifierTicket(@PathVariable(value = "id") int ticketId, @RequestBody Ticket ticketDetails, Principal principal) {
-        String currentUsername = principal.getName();
-        Ticket updatedTicket =utilisateurService.ModifierTicket(ticketId, ticketDetails, currentUsername);
+        String currentApprenant = principal.getName();
+        Ticket updatedTicket =utilisateurService.ModifierTicket(ticketId, ticketDetails, currentApprenant);
         return ResponseEntity.ok(updatedTicket);
     }
 

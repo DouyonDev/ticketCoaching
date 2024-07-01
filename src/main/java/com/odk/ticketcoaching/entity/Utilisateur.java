@@ -36,12 +36,16 @@ public class Utilisateur {
     @Enumerated(EnumType.STRING)
     private Roles role;
 
-    @OneToMany(mappedBy = "utilisateur")
+    @OneToMany(mappedBy = "apprenant")
     private Set<Ticket> tickets;
-    @OneToMany(mappedBy = "utilisateur")
-    private Set<Notification> notifications;
+    @OneToMany(mappedBy = "apprenant")
+    private Set<Notification> notificationsApprenant;
+    @OneToMany(mappedBy = "formateur")
+    private  Set<Notification>  notificationsFormateur;
 
 
+    @OneToOne
+    private Utilisateur utilisateurMere;
 
 
 }
